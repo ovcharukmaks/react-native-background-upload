@@ -149,6 +149,7 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
     NSString *method = options[@"method"] ?: @"POST";
     NSString *uploadType = options[@"type"] ?: @"raw";
     NSString *fieldName = options[@"field"];
+    NSString *metadataFieldName = options[@"metadataFieldName"];
     NSString *customUploadId = options[@"customUploadId"];
     NSDictionary *headers = options[@"headers"];
     NSDictionary *parameters = options[@"parameters"];
@@ -194,7 +195,7 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
             NSString *uuidStr = [[NSUUID UUID] UUIDString];
             [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", uuidStr] forHTTPHeaderField:@"Content-Type"];
 
-            NSData *httpBody = [self createBodyWithBoundary:uuidStr path:fileURI parameters: parameters fieldName:fieldName];
+            NSData *httpBody = [self createBodyWithBoundary:uuidStr path:fileURI parameters: parameters fieldName:fieldName metadataFieldName:metadataFieldName];
             [request setHTTPBody: httpBody];
 
             uploadTask = [[self urlSession] uploadTaskWithStreamedRequest:request];
@@ -237,7 +238,8 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
                          path:(NSString *)path
                          parameters:(NSDictionary *)parameters
-                         fieldName:(NSString *)fieldName {
+                         fieldName:(NSString *)fieldName
+                 metadataFieldName:(NSString *)metadataFieldName {
 
     NSMutableData *httpBody = [NSMutableData data];
 
@@ -251,7 +253,7 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
 
     [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *parameterKey, NSString *parameterValue, BOOL *stop) {
         [httpBody appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-        [httpBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@.metadata.json\"\r\n\r\n", parameterKey, filename] dataUsingEncoding:NSUTF8StringEncoding]];
+        [httpBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@%@\"\r\n\r\n", parameterKey, filename, metadataFieldName] dataUsingEncoding:NSUTF8StringEncoding]];
         [httpBody appendData:[[NSString stringWithFormat:@"%@\r\n", parameterValue] dataUsingEncoding:NSUTF8StringEncoding]];
     }];
 

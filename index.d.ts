@@ -93,6 +93,7 @@ declare module "react-native-background-upload" {
     export interface MultipartUploadOptions extends UploadOptions {
         type: 'multipart'
         field: string
+        metadataFieldName: string
         parameters?: {
             [index: string]: string
         }

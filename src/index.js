@@ -18,6 +18,7 @@ export type StartUploadArgs = {
   type?: 'raw' | 'multipart',
   // This option is needed for multipart type
   field?: string,
+  metadataFieldName?: string,
   customUploadId?: string,
   // parameters are supported only in multipart type
   parameters?: { [string]: string },
